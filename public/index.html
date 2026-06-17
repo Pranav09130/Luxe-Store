@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Replace content value with your real Google OAuth Client ID -->
+  <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+  <title>Luxe Store — Premium E-Commerce</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">LUXE<span>.</span></a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#home"         class="nav-link">Home</a></li>
+        <li><a href="#features"     class="nav-link">Features</a></li>
+        <li><a href="#products"     class="nav-link">Products</a></li>
+        <li><a href="#testimonials" class="nav-link">Reviews</a></li>
+        <li><a href="#newsletter"   class="nav-link">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="icon-btn" id="search-toggle" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <button class="icon-btn cart-btn" id="cart-toggle" aria-label="Cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" id="cart-count">0</span>
+        </button>
+
+        <!-- Auth buttons (logged out) -->
+        <div class="nav-auth-btns" id="nav-auth-btns">
+          <button class="btn-nav-login" id="btn-login">Log In</button>
+          <button class="btn-nav-signup" id="btn-signup">Sign Up</button>
+        </div>
+
+        <!-- User pill (logged in) -->
+        <div class="nav-user-panel" id="nav-user-panel" style="display:none; align-items:center; gap:8px;">
+          <div class="user-pill">
+            <div class="user-avatar" id="user-avatar">U</div>
+            <span class="user-name" id="user-display-name">User</span>
+          </div>
+          <button class="btn-logout" onclick="logoutUser()">Logout</button>
+        </div>
+
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <div class="search-bar" id="search-bar">
+      <div class="search-inner">
+        <input type="text" id="search-input" placeholder="Search for products…" class="search-input" />
+        <button class="search-close" id="search-close">✕</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== AUTH MODAL ===================== -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-logo">LUXE<span>.</span></span>
+        <button class="modal-close" id="auth-modal-close">✕</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login">Log In</button>
+        <button class="modal-tab" data-tab="signup">Create Account</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- LOGIN PANEL -->
+        <div id="login-panel">
+          <h2 class="modal-title">Welcome back</h2>
+          <p class="modal-sub">Sign in to access your orders & wishlist</p>
+          <form class="auth-form" id="login-form" novalidate>
+            <div class="auth-group">
+              <label for="login-email">Email Address</label>
+              <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email" />
+              <span class="auth-err" id="login-email-err"></span>
+            </div>
+            <div class="auth-group">
+              <label for="login-pass">Password</label>
+              <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" />
+              <span class="auth-err" id="login-pass-err"></span>
+            </div>
+            <button type="submit" class="btn-auth">Log In →</button>
+            <div class="auth-divider">or</div>
+            <button type="button" class="btn-google">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Continue with Google
+            </button>
+          </form>
+          <p class="auth-switch">Don't have an account? <a id="switch-to-signup">Sign up free →</a></p>
+        </div>
+
+        <!-- SIGNUP PANEL -->
+        <div id="signup-panel" style="display:none;">
+          <h2 class="modal-title">Join Luxe</h2>
+          <p class="modal-sub">Create your account for faster checkout & exclusive offers</p>
+          <form class="auth-form" id="signup-form" novalidate>
+            <div class="auth-row">
+              <div class="auth-group">
+                <label for="signup-fname">First Name</label>
+                <input type="text" id="signup-fname" placeholder="Pranav" autocomplete="given-name" />
+                <span class="auth-err" id="su-fname-err"></span>
+              </div>
+              <div class="auth-group">
+                <label for="signup-lname">Last Name</label>
+                <input type="text" id="signup-lname" placeholder="Medhe" autocomplete="family-name" />
+                <span class="auth-err" id="su-lname-err"></span>
+              </div>
+            </div>
+            <div class="auth-group">
+              <label for="signup-email">Email Address</label>
+              <input type="email" id="signup-email" placeholder="your@email.com" autocomplete="email" />
+              <span class="auth-err" id="su-email-err"></span>
+            </div>
+            <div class="auth-group">
+              <label for="signup-pass">Password</label>
+              <input type="password" id="signup-pass" placeholder="Min. 6 characters" autocomplete="new-password" />
+              <span class="auth-err" id="su-pass-err"></span>
+            </div>
+            <div class="auth-group">
+              <label for="signup-confirm">Confirm Password</label>
+              <input type="password" id="signup-confirm" placeholder="••••••••" autocomplete="new-password" />
+              <span class="auth-err" id="su-confirm-err"></span>
+            </div>
+            <button type="submit" class="btn-auth">Create Account →</button>
+            <div class="auth-divider">or</div>
+            <button type="button" class="btn-google">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Sign up with Google
+            </button>
+          </form>
+          <p class="auth-switch">Already have an account? <a id="switch-to-login">Log in →</a></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== RAZORPAY PAYMENT MODAL ===================== -->
+  <div class="pay-modal-overlay" id="pay-modal">
+    <div class="pay-modal-box">
+
+      <div class="pay-header">
+        <div class="pay-header-left">
+          <div class="pay-title">Secure Checkout</div>
+          <div class="pay-subtitle">Luxe Store</div>
+        </div>
+        <button class="pay-close" id="pay-modal-close">✕</button>
+      </div>
+
+      <!-- Razorpay branding bar -->
+      <div class="pay-brand-bar">
+        <svg width="90" height="20" viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="0" y="15" font-family="Arial" font-size="12" font-weight="700" fill="white">Razorpay</text>
+        </svg>
+        <span class="pay-brand-text">Powered by <strong>Razorpay</strong></span>
+        <span class="pay-secure-badge">
+          <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 0L0 2.5v4c0 2.5 2.5 4.5 5 5 2.5-.5 5-2.5 5-5v-4L5 0z" fill="rgba(255,255,255,0.6)"/></svg>
+          Secured
+        </span>
+      </div>
+
+      <div id="pay-main-content">
+        <div class="pay-body">
+
+          <!-- Order Summary -->
+          <div class="pay-order-summary">
+            <div class="pay-order-title">Order Summary</div>
+            <div class="pay-order-items" id="pay-order-items"></div>
+            <div class="pay-order-divider"></div>
+            <div class="pay-order-total">
+              <span>Total (incl. free shipping)</span>
+              <span id="pay-total-amount">₹0</span>
+            </div>
+          </div>
+
+          <!-- Payment Method Tabs -->
+          <div class="pay-methods">
+            <div class="pay-methods-label">Choose Payment Method</div>
+            <div class="pay-method-tabs">
+              <button class="pay-method-tab active" data-method="card">💳 Card</button>
+              <button class="pay-method-tab" data-method="upi">📱 UPI</button>
+              <button class="pay-method-tab" data-method="netbank">🏦 Netbanking</button>
+              <button class="pay-method-tab" data-method="cod">📦 COD</button>
+            </div>
+
+            <!-- CARD FIELDS -->
+            <div class="pay-card-fields active" id="pay-card-fields">
+              <div class="pay-input-group">
+                <label>Card Number</label>
+                <input type="text" placeholder="4111 1111 1111 1111" maxlength="19"
+                  oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{4})/g,'$1 ').trim()" />
+              </div>
+              <div class="pay-row">
+                <div class="pay-input-group">
+                  <label>Expiry (MM/YY)</label>
+                  <input type="text" placeholder="12/28" maxlength="5" />
+                </div>
+                <div class="pay-input-group">
+                  <label>CVV</label>
+                  <input type="password" placeholder="•••" maxlength="3" />
+                </div>
+              </div>
+              <div class="pay-input-group">
+                <label>Cardholder Name</label>
+                <input type="text" placeholder="PRANAV MEDHE" />
+              </div>
+            </div>
+
+            <!-- UPI FIELD -->
+            <div class="pay-upi-field" id="pay-upi-field">
+              <label>UPI ID</label>
+              <div class="upi-apps">
+                <button type="button" class="upi-app-btn" data-app="gpay">GPay</button>
+                <button type="button" class="upi-app-btn" data-app="phonepe">PhonePe</button>
+                <button type="button" class="upi-app-btn" data-app="paytm">Paytm</button>
+                <button type="button" class="upi-app-btn" data-app="bhim">BHIM</button>
+              </div>
+              <input type="text" id="upi-id-input" placeholder="yourname@upi" />
+            </div>
+
+            <!-- NETBANKING FIELD -->
+            <div class="pay-netbank-field" id="pay-netbank-field">
+              <label>Select Bank</label>
+              <select>
+                <option value="">-- Choose your bank --</option>
+                <option>State Bank of India</option>
+                <option>HDFC Bank</option>
+                <option>ICICI Bank</option>
+                <option>Axis Bank</option>
+                <option>Kotak Mahindra Bank</option>
+                <option>Punjab National Bank</option>
+                <option>Bank of Baroda</option>
+                <option>Canara Bank</option>
+              </select>
+            </div>
+
+          </div>
+
+          <button class="btn-pay" id="btn-pay-now">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Pay Now
+          </button>
+        </div>
+
+        <div class="pay-footer">
+          <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 0L0 3v5c0 3.5 3 6 6 7 3-1 6-3.5 6-7V3L6 0z" fill="var(--muted)"/></svg>
+          256-bit SSL encrypted · PCI DSS compliant
+        </div>
+      </div>
+
+      <!-- SUCCESS SCREEN -->
+      <div class="pay-success" id="pay-success-screen">
+        <div class="pay-success-icon">✅</div>
+        <h3>Payment Successful!</h3>
+        <p id="pay-confirmed-amount" style="font-size:1rem; font-weight:600; color:var(--dark); margin:4px 0 8px;"></p>
+        <p>Your order has been placed and is being processed.</p>
+        <span class="pay-success-id" id="pay-order-id">Order ID: —</span>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:20px;">A confirmation will be sent to your email shortly.</p>
+        <button class="btn-primary" onclick="closePayModal()">Continue Shopping →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== CART SIDEBAR ===================== -->
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <aside class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h3 class="cart-title">Your Cart</h3>
+      <button class="cart-close" id="cart-close">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty" id="cart-empty">
+        <div class="cart-empty-icon">🛒</div>
+        <p>Your cart is empty</p>
+        <a href="#products" class="btn-primary" id="shop-now-btn">Shop Now</a>
+      </div>
+    </div>
+    <div class="cart-footer" id="cart-footer" style="display:none;">
+      <div class="cart-total-row"><span>Subtotal</span><span id="cart-subtotal">₹0</span></div>
+      <div class="cart-total-row"><span>Shipping</span><span class="free-ship">FREE</span></div>
+      <div class="cart-total-row total-final"><span>Total</span><span id="cart-total">₹0</span></div>
+      <button class="btn-primary btn-full" id="checkout-btn">Checkout →</button>
+      <button class="btn-ghost btn-full" id="clear-cart">Clear Cart</button>
+    </div>
+  </aside>
+
+  <!-- ===================== HERO ===================== -->
+  <section id="home" class="hero">
+    <div class="hero-bg-text">LUXE</div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <span class="hero-eyebrow">New Collection 2026</span>
+        <h1 class="hero-title">Redefine Your<br/><em>Style.</em></h1>
+        <p class="hero-desc">Curated luxury products for those who demand nothing but the finest. Free shipping on orders above ₹999.</p>
+        <div class="hero-btns">
+          <a href="#products" class="btn-primary">Shop Collection</a>
+          <a href="#features" class="btn-ghost">Learn More</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>10K+</strong><span>Happy Customers</span></div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat"><strong>500+</strong><span>Premium Products</span></div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat"><strong>4.9★</strong><span>Average Rating</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-big">
+          <div class="hero-card-inner">
+            <div class="hero-emoji">👜</div>
+            <p class="hero-card-label">New Arrival</p>
+            <h4 class="hero-card-title">Designer Collection</h4>
+            <p class="hero-card-price">From ₹2,499</p>
+          </div>
+        </div>
+        <div class="hero-card-small card-top"><span>🚚</span> Free Shipping</div>
+        <div class="hero-card-small card-bottom"><span>⭐</span> 4.9 / 5 Rated</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURES STRIP ===================== -->
+  <section class="features-strip">
+    <div class="features-strip-grid">
+      <div class="strip-item"><span>🚚</span><div><strong>Free Shipping</strong><p>On orders above ₹999</p></div></div>
+      <div class="strip-item"><span>🔄</span><div><strong>Easy Returns</strong><p>30-day return policy</p></div></div>
+      <div class="strip-item"><span>🔒</span><div><strong>Secure Payment</strong><p>100% safe transactions</p></div></div>
+      <div class="strip-item"><span>🎁</span><div><strong>Gift Wrapping</strong><p>Available on all orders</p></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Why Choose Us</span>
+        <h2 class="section-title">Shopping made <em>effortless</em></h2>
+      </div>
+      <div class="features-cards">
+        <div class="feat-card"><div class="feat-icon">✦</div><h3>Curated Quality</h3><p>Every product is hand-picked and quality-tested by our expert team.</p></div>
+        <div class="feat-card"><div class="feat-icon">⚡</div><h3>Lightning Fast</h3><p>Same-day dispatch for orders placed before 2PM. Track in real-time.</p></div>
+        <div class="feat-card feat-card-accent"><div class="feat-icon">💎</div><h3>Premium Experience</h3><p>Luxurious packaging and a personal thank-you note with every order.</p></div>
+        <div class="feat-card"><div class="feat-icon">🛡️</div><h3>Buyer Protection</h3><p>Full refund guarantee if you're not 100% satisfied. No questions asked.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRODUCTS ===================== -->
+  <section id="products" class="section section-cream">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Our Collection</span>
+        <h2 class="section-title">Featured <em>Products</em></h2>
+      </div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="bags">Bags</button>
+        <button class="filter-tab" data-filter="accessories">Accessories</button>
+        <button class="filter-tab" data-filter="footwear">Footwear</button>
+        <button class="filter-tab" data-filter="apparel">Apparel</button>
+      </div>
+      <div class="products-grid" id="products-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== PROMO BANNER ===================== -->
+  <section class="promo-banner">
+    <div class="promo-inner">
+      <div class="promo-content">
+        <span class="promo-eyebrow">Limited Time Offer</span>
+        <h2 class="promo-title">Get 20% OFF<br/>Your First Order</h2>
+        <p>Use code <strong>LUXE20</strong> at checkout. Valid for new customers only.</p>
+        <a href="#products" class="btn-white">Claim Offer →</a>
+      </div>
+      <div class="promo-visual">
+        <div class="promo-circle">20%<br/><span>OFF</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TESTIMONIALS ===================== -->
+  <section id="testimonials" class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Customer Reviews</span>
+        <h2 class="section-title">What they're <em>saying</em></h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"Absolutely love the quality! The bag exceeded my expectations. Fast shipping too!"</p>
+          <div class="testimonial-author"><div class="author-avatar">P</div><div><strong>Priya S.</strong><span>Mumbai</span></div></div>
+        </div>
+        <div class="testimonial-card testimonial-featured">
+          <div class="stars">★★★★★</div>
+          <p>"Best online shopping experience. The packaging was premium and the product was exactly as described."</p>
+          <div class="testimonial-author"><div class="author-avatar">R</div><div><strong>Rahul M.</strong><span>Pune</span></div></div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"Returns were hassle-free. Great customer service. Will definitely shop here again!"</p>
+          <div class="testimonial-author"><div class="author-avatar">A</div><div><strong>Aisha K.</strong><span>Delhi</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NEWSLETTER ===================== -->
+  <section id="newsletter" class="section section-dark">
+    <div class="container">
+      <div class="newsletter-inner">
+        <div class="newsletter-left">
+          <span class="eyebrow eyebrow-light">Stay Updated</span>
+          <h2 class="newsletter-title">Get exclusive <em>deals</em> to your inbox</h2>
+          <p>Join 10,000+ subscribers. Never miss a sale, new arrival, or exclusive offer.</p>
+        </div>
+        <div class="newsletter-right">
+          <form id="newsletter-form" class="newsletter-form" novalidate>
+            <div class="nl-group">
+              <label for="nl-name">Full Name *</label>
+              <input type="text" id="nl-name" placeholder="Pranav Medhe" />
+              <p class="nl-error" id="nl-name-err">Please enter your name.</p>
+            </div>
+            <div class="nl-group">
+              <label for="nl-email">Email Address *</label>
+              <input type="email" id="nl-email" placeholder="your@email.com" />
+              <p class="nl-error" id="nl-email-err">Please enter a valid email.</p>
+            </div>
+            <div class="nl-group">
+              <label for="nl-phone">Phone (optional)</label>
+              <input type="tel" id="nl-phone" placeholder="+91 98765 43210" />
+            </div>
+            <div class="nl-checkbox-group">
+              <input type="checkbox" id="nl-agree" />
+              <label for="nl-agree">I agree to receive marketing emails from Luxe Store.</label>
+            </div>
+            <p class="nl-error" id="nl-agree-err">Please agree to continue.</p>
+            <button type="submit" class="btn-primary btn-full">Subscribe & Get 10% Off →</button>
+            <div class="nl-success" id="nl-success">🎉 You're subscribed! Check your email for your 10% off coupon.</div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">LUXE<span>.</span></a>
+          <p>Premium products, unmatched experience. Shop the finest collection curated just for you.</p>
+          <div class="footer-socials">
+            <a href="#" class="soc">ig</a>
+            <a href="#" class="soc">fb</a>
+            <a href="#" class="soc">tw</a>
+            <a href="#" class="soc">yt</a>
+          </div>
+        </div>
+        <div class="footer-col"><h4>Shop</h4><ul><li><a href="#products">New Arrivals</a></li><li><a href="#products">Bags</a></li><li><a href="#products">Accessories</a></li><li><a href="#products">Footwear</a></li><li><a href="#products">Apparel</a></li></ul></div>
+        <div class="footer-col"><h4>Help</h4><ul><li><a href="#">Track Order</a></li><li><a href="#">Returns</a></li><li><a href="#">Size Guide</a></li><li><a href="#">FAQs</a></li><li><a href="#">Contact Us</a></li></ul></div>
+        <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 Luxe Store. Built by <strong>Pranav Medhe</strong> | SaiKet Systems Internship — Task 2</p>
+        <div class="payment-badges"><span>💳 Visa</span><span>💳 Mastercard</span><span>📱 UPI</span><span>💰 COD</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ===================== PROFILE MODAL ===================== -->
+  <div class="modal-overlay profile-modal-overlay" id="profile-modal">
+    <div class="profile-modal-box">
+      <div class="profile-modal-inner">
+
+        <!-- Sidebar Nav -->
+        <aside class="profile-sidebar">
+          <div class="profile-sidebar-head">
+            <div class="profile-avatar-sm" id="profile-avatar-sm">U</div>
+            <div id="profile-sidebar-name">My Account</div>
+          </div>
+          <nav class="profile-nav">
+            <a href="#" class="profile-nav-link active" data-section="overview" onclick="renderProfileSection('overview'); return false;">
+              <span class="pnl-icon">👤</span> Overview
+            </a>
+            <a href="#" class="profile-nav-link" data-section="orders" onclick="renderProfileSection('orders'); return false;">
+              <span class="pnl-icon">📦</span> My Orders
+            </a>
+            <a href="#" class="profile-nav-link" data-section="wishlist" onclick="renderProfileSection('wishlist'); return false;">
+              <span class="pnl-icon">❤️</span> Wishlist
+            </a>
+            <a href="#" class="profile-nav-link" data-section="settings" onclick="renderProfileSection('settings'); return false;">
+              <span class="pnl-icon">⚙️</span> Settings
+            </a>
+            <!-- Admin only -->
+            <a href="#" class="profile-nav-link profile-nav-admin" data-section="admin" id="admin-nav-link" style="display:none" onclick="renderProfileSection('admin'); return false;">
+              <span class="pnl-icon">🛡️</span> Admin Panel
+            </a>
+          </nav>
+          <button class="profile-close-btn" onclick="closeProfileModal()">✕ Close</button>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="profile-main" id="profile-content">
+          <!-- Rendered by JS -->
+        </main>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+
+   currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;
+    // Show admin nav link if user is admin
+    document.addEventListener("DOMContentLoaded", () => {
+      setInterval(() => {
+        const link = document.getElementById("admin-nav-link");
+        const avatarSm = document.getElementById("profile-avatar-sm");
+        const sidebarName = document.getElementById("profile-sidebar-name");
+        if (currentUser) {
+          if (link && currentUser.isAdmin) link.style.display = "flex";
+          if (avatarSm) avatarSm.textContent = (currentUser.firstName[0]+(currentUser.lastName?.[0]||'')).toUpperCase();
+          if (sidebarName) sidebarName.textContent = currentUser.firstName + " " + currentUser.lastName;
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>
